@@ -20,37 +20,37 @@ require_once 'dso/cielo/nodes/PaymentMethodNode.php';
 class Transaction {
 	/**
 	 * Dados de autenticação
-	 * @var Authentication
+	 * @var AuthenticationNode
 	 */
 	private $authentication;
 
 	/**
 	 * Dados de autorização
-	 * @var Authorization
+	 * @var AuthorizationNode
 	 */
 	private $authorization;
 
 	/**
 	 * Dados de cancelamento
-	 * @var Cancellation
+	 * @var CancellationNode
 	 */
 	private $cancellation;
 
 	/**
 	 * Dados de captura
-	 * @var Capture
+	 * @var CaptureNode
 	 */
 	private $capture;
 
 	/**
 	 * Dados do Pedido
-	 * @var OrderData
+	 * @var OrderDataNode
 	 */
 	private $orderData;
 
 	/**
 	 * Dados da forma de pagamento
-	 * @var PaymentMethod
+	 * @var PaymentMethodNode
 	 */
 	private $paymentMethod;
 
@@ -154,7 +154,7 @@ class Transaction {
 	/**
 	 * @brief	Recupera os dados de autenticação.
 	 * @details	Dados da autenticação caso tenha passado por essa etapa.
-	 * @return	Authentication
+	 * @return	AuthenticationNode
 	 */
 	public function getAuthentication() {
 		return $this->authentication;
@@ -163,7 +163,7 @@ class Transaction {
 	/**
 	 * @brief	Recupera os dados de autorização.
 	 * @details	Dados da autorização caso tenha passado por essa etapa.
-	 * @return	Authorization
+	 * @return	AuthorizationNode
 	 */
 	public function getAuthorization() {
 		return $this->authorization;
@@ -172,7 +172,7 @@ class Transaction {
 	/**
 	 * @brief	Recupera os dados de cancelamento.
 	 * @details	Dados do cancelamento caso tenha passado por essa etapa.
-	 * @return	Cancellation
+	 * @return	CancellationNode
 	 */
 	public function getCancellation() {
 		return $this->capture;
@@ -181,7 +181,7 @@ class Transaction {
 	/**
 	 * @brief	Recupera os dados de captura.
 	 * @details	Dados da captura caso tenha passado por essa etapa.
-	 * @return	Capture
+	 * @return	CaptureNode
 	 */
 	public function getCapture() {
 		return $this->capture;
@@ -190,7 +190,7 @@ class Transaction {
 	/**
 	 * @brief	Recupera os dados do pedido.
 	 * @details	Idêntico ao enviado pela loja na criação da transação.
-	 * @return	OrderData
+	 * @return	OrderDataNode
 	 */
 	public function getOrderData() {
 		return $this->orderData;
@@ -199,7 +199,7 @@ class Transaction {
 	/**
 	 * @brief	Recupera a forma de pagamento.
 	 * @details	Idêntico ao enviado pela loja na criação da transação.
-	 * @return	PaymentMethod
+	 * @return	PaymentMethodNode
 	 */
 	public function getPaymentMethod() {
 		return $this->paymentMethod;
