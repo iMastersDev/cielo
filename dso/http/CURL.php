@@ -29,8 +29,8 @@ class CURL implements HTTPRequest {
 	/**
 	 * Destroi o objeto e fecha a conexão se estiver aberta
 	 */
-	public function __destruct(){
-		if ( $this->testResource( false ) ){
+	public function __destruct() {
+		if ( $this->testResource( false ) ) {
 			curl_close( $this->curl );
 		}
 	}
@@ -41,7 +41,7 @@ class CURL implements HTTPRequest {
 	 * @throws	BadMethodCallException Se o recurso CURL não estiver aberto
 	 */
 	public function close() {
-		if ( $this->testResource() ){
+		if ( $this->testResource() ) {
 			curl_close( $this->curl );
 		}
 	}
@@ -54,18 +54,20 @@ class CURL implements HTTPRequest {
 	 * @throws	BadMethodCallException Caso o recurso não esteja aberto.
 	 */
 	public function execute( array $data = array() , $method = HTTPRequestMethod::GET ) {
-		if ( $this->testResource() ){
-			switch ( $method ){
-				case HTTPRequestMethod::POST:
-					curl_setopt(  $this->curl , CURLOPT_POST , 1 );
-	        		curl_setopt(  $this->curl , CURLOPT_POSTFIELDS , http_build_query( $data ) );
+		if ( $this->testResource() ) {
+			curl_setopt( $this->curl , CURLOPT_RETURNTRANSFER , 1 );
 
-	        		break;
-				case HTTPRequestMethod::DELETE:
-				case HTTPRequestMethod::PUT:
+			switch ( $method ) {
+				case HTTPRequestMethod::POST :
+					curl_setopt( $this->curl , CURLOPT_POST , 1 );
+					curl_setopt( $this->curl , CURLOPT_POSTFIELDS , http_build_query( $data ) );
+
+					break;
+				case HTTPRequestMethod::DELETE :
+				case HTTPRequestMethod::PUT :
 					curl_setopt( $this->curl , CURLOPT_CUSTOMREQUEST , $method );
-				case HTTPRequestMethod::GET:
-					curl_setopt(  $this->curl , CURLOPT_URL , sprintf( '%s?%s' , $this->target , http_build_query( $data ) ) );
+				case HTTPRequestMethod::GET :
+					curl_setopt( $this->curl , CURLOPT_URL , sprintf( '%s?%s' , $this->target , http_build_query( $data ) ) );
 					break;
 				default :
 					throw new UnexpectedValueException( 'Método desconhecido' );
@@ -75,7 +77,7 @@ class CURL implements HTTPRequest {
 			$error = curl_error( $this->curl );
 			$errno = curl_errno( $this->curl );
 
-			if ( (int) $errno != 0 ){
+			if ( (int) $errno != 0 ) {
 				throw new RuntimeException( $error , $errno );
 			}
 
@@ -92,11 +94,11 @@ class CURL implements HTTPRequest {
 	 * @throws	RuntimeException Se não for possível iniciar cURL
 	 */
 	public function open( $target ) {
-		if ( function_exists( 'curl_init' ) ){
+		if ( function_exists( 'curl_init' ) ) {
 			/**
 			 * Fechamos uma conexão existente antes de abrir uma nova
 			 */
-			if ( is_resource( $this->curl ) ){
+			if ( is_resource( $this->curl ) ) {
 				$this->close();
 			}
 
@@ -105,17 +107,17 @@ class CURL implements HTTPRequest {
 			/**
 			 * Verificamos se o recurso CURL foi criado com êxito
 			 */
-	 		if ( is_resource( $curl ) ){
-	 			curl_setopt( $curl , CURLOPT_SSL_VERIFYPEER , 0 );
-	 			curl_setopt( $curl , CURLOPT_HEADER , 0 );
-	 			curl_setopt( $curl , CURLOPT_FOLLOWLOCATION , 1 );
-	 			curl_setopt( $curl , CURLOPT_URL , $target );
+			if ( is_resource( $curl ) ) {
+				curl_setopt( $curl , CURLOPT_SSL_VERIFYPEER , 0 );
+				curl_setopt( $curl , CURLOPT_HEADER , 0 );
+				curl_setopt( $curl , CURLOPT_FOLLOWLOCATION , 1 );
+				curl_setopt( $curl , CURLOPT_URL , $target );
 
-	 			$this->curl = $curl;
-	 			$this->target = $target;
-			 } else {
-			 	throw new RuntimeException( 'Não foi possível iniciar cURL' );
-			 }
+				$this->curl = $curl;
+				$this->target = $target;
+			} else {
+				throw new RuntimeException( 'Não foi possível iniciar cURL' );
+			}
 		} else {
 			throw new RuntimeException( 'Extensão cURL não está instalada.' );
 		}
@@ -128,9 +130,9 @@ class CURL implements HTTPRequest {
 	 * @return	boolean Caso o recurso curl esteja aberto.
 	 * @throws	BadMethodCallException Caso o recurso não esteja aberto.
 	 */
-	private function testResource( $throws = true ){
-		if ( !is_resource( $this->curl ) ){
-			if ( $throws ){
+	private function testResource( $throws = true ) {
+		if (  !is_resource( $this->curl ) ) {
+			if ( $throws ) {
 				throw new BadMethodCallException( 'Recurso cURL não está aberto' );
 			} else {
 				return false;
