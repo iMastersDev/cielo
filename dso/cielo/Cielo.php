@@ -169,6 +169,14 @@ class Cielo {
 		if ( ( ( $paymentProduct == PaymentProduct::ONE_TIME_PAYMENT ) || ( $paymentProduct == PaymentProduct::DEBIT ) ) && ( $parcels != 1 ) ) {
 			throw new UnexpectedValueException( 'Quando a forma de pagamento é Crédito à vista ou Débito, o número de parcelas deve ser 1' );
 		} else {
+			if ( $creditCard == CreditCard::MASTER_CARD && $indicator != 1 ) {
+				throw new UnexpectedValueException( 'Quando o cartão é MasterCard, o indicador deve ser 1' );
+			}
+
+			if ( $indicator == 1 && !preg_match( '/^[0-9]{3}$/' , (string) $securityCode ) ){
+				throw new UnexpectedValueException( 'Quando o indicador de segurança é 1, o código de segurança deve ser informado' );
+			}
+
 			if ( is_int( $orderValue ) || is_float( $orderValue ) ) {
 				$this->transaction = new AuthorizationRequest( $this->getHTTPRequester() );
 				$this->transaction->addNode( new EcDataNode( $this->getAffiliationCode() , $this->getAffiliationKey() ) );
