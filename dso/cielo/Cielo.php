@@ -133,6 +133,16 @@ class Cielo {
 	}
 
 	/**
+	 * Define que a captura será feita automaticamente, por padrão a captura é manual.
+	 * @return	Cielo
+	 */
+	public function automaticCapture() {
+		$this->automaticCapture = true;
+
+		return $this;
+	}
+
+	/**
 	 * Cria um objeto de requisição de autorização da transacao
 	 * @param	string $tid ID da transação
 	 * @param	string $creditCard Tipo do cartão
@@ -155,7 +165,7 @@ class Cielo {
 	 * @throws	UnexpectedValueException Se $formaPagamento for 1 (Crédito à Vista) ou A (Débito) e o número de parcelas
 	 * for diferente de 1
 	 */
-	public function buildAuthorizationRequest( $tid , $creditCard , $cardNumber , $cardExpiration , $indicator , $securityCode , $orderNumber , $orderValue , $paymentProduct , $parcels = 1 , $freeField = null ) {
+	final public function buildAuthorizationRequest( $tid , $creditCard , $cardNumber , $cardExpiration , $indicator , $securityCode , $orderNumber , $orderValue , $paymentProduct , $parcels = 1 , $freeField = null ) {
 		if ( ( ( $paymentProduct == PaymentProduct::ONE_TIME_PAYMENT ) || ( $paymentProduct == PaymentProduct::DEBIT ) ) && ( $parcels != 1 ) ) {
 			throw new UnexpectedValueException( 'Quando a forma de pagamento é Crédito à vista ou Débito, o número de parcelas deve ser 1' );
 		} else {
@@ -181,6 +191,63 @@ class Cielo {
 	}
 
 	/**
+	 * @brief	Cria um objeto de requisição de cancelamento de transacao
+	 * @details	Constroi o objeto de transação a partir de uma consulta para cancelamento, utilizando o TID (<i>Transaction ID</i>).
+	 * @param	string $tid TID da transação que será utilizado para fazer a consulta
+	 * @return	CancellationRequest
+	 */
+	final public function buildCancellationTransaction( $tid ) {
+		$this->transaction = new CancellationRequest( $this->getHTTPRequester() );
+		$this->transaction->addNode( new EcDataNode( $this->getAffiliationCode() , $this->getAffiliationKey() ) );
+		$this->transaction->setTID( $tid );
+		$this->transaction->setURL( $this->cieloURL );
+
+		return $this->transaction;
+	}
+
+	/**
+	 * @brief	Cria um objeto Transacao
+	 * @details	Constroi o objeto de transação a partir de uma captura, utilizando o TID (<i>Transaction ID</i>).
+	 * @param	string $tid TID da transação que será utilizado para fazer a captura
+	 * @param	float $value Valor que será capturado
+	 * @return	CaptureRequest
+	 * @throws	InvalidArgumentException Se o valor for definido mas não for numérico
+	 */
+	final public function buildCaptureTransaction( $tid , $value = null ) {
+		$nullValue = is_null( $value );
+
+		if ( $nullValue || is_float( $value ) || is_int( $value ) ) {
+			$this->transaction = new CaptureRequest( $this->getHTTPRequester() );
+			$this->transaction->addNode( new EcDataNode( $this->getAffiliationCode() , $this->getAffiliationKey() ) );
+			$this->transaction->setTID( $tid );
+			$this->transaction->setURL( $this->cieloURL );
+
+			if (  !$nullValue ) {
+				$this->transaction->setValue( $value );
+			}
+
+			return $this->transaction;
+		} else {
+			throw new InvalidArgumentException( sprintf( 'O valor deve ser um inteiro ou float, %s foi dado' , gettype( $value ) ) );
+		}
+	}
+
+	/**
+	 * @brief	Cria um objeto Transacao
+	 * @details	Constroi o objeto de transação a partir de uma consulta, utilizando o TID (<i>Transaction ID</i>).
+	 * @param	string $tid TID da transação que será utilizado para fazer a consulta
+	 * @return	QueryRequest
+	 */
+	final public function buildQueryTransaction( $tid ) {
+		$this->transaction = new QueryRequest( $this->getHTTPRequester() );
+		$this->transaction->addNode( new EcDataNode( $this->getAffiliationCode() , $this->getAffiliationKey() ) );
+		$this->transaction->setTID( $tid );
+		$this->transaction->setURL( $this->cieloURL );
+
+		return $this->transaction;
+	}
+
+	/**
 	 * @brief	Cria um objeto de requisição de TID
 	 * @param	string $creditCard Tipo do cartão
 	 * @param	string $paymentProduct Forma de pagamento do pedido, pode ser uma das seguintes:
@@ -195,7 +262,7 @@ class Cielo {
 	 * @throws	UnexpectedValueException Se $formaPagamento for 1 (Crédito à Vista) ou A (Débito) e o número de parcelas
 	 * for diferente de 1
 	 */
-	public function buildTIDRequest( $creditCard , $paymentProduct , $parcels = 1 ) {
+	final public function buildTIDRequest( $creditCard , $paymentProduct , $parcels = 1 ) {
 		if ( ( ( $paymentProduct == PaymentProduct::ONE_TIME_PAYMENT ) || ( $paymentProduct == PaymentProduct::DEBIT ) ) && ( $parcels != 1 ) ) {
 			throw new UnexpectedValueException( 'Quando a forma de pagamento é Crédito à vista ou Débito, o número de parcelas deve ser 1' );
 		} else {
@@ -250,73 +317,6 @@ class Cielo {
 				throw new UnexpectedValueException( sprintf( 'O valor do pedido deve ser numérico, %s foi dado.' , gettype( $orderValue ) ) );
 			}
 		}
-	}
-
-	/**
-	 * @brief	Cria um objeto Transacao
-	 * @details	Constroi o objeto de transação a partir de uma consulta, utilizando o TID (<i>Transaction ID</i>).
-	 * @param	string $tid TID da transação que será utilizado para fazer a consulta
-	 * @return	QueryRequest
-	 */
-	final public function buildQueryTransaction( $tid ) {
-		$this->transaction = new QueryRequest( $this->getHTTPRequester() );
-		$this->transaction->addNode( new EcDataNode( $this->getAffiliationCode() , $this->getAffiliationKey() ) );
-		$this->transaction->setTID( $tid );
-		$this->transaction->setURL( $this->cieloURL );
-
-		return $this->transaction;
-	}
-
-	/**
-	 * @brief	Cria um objeto Transacao
-	 * @details	Constroi o objeto de transação a partir de uma consulta para cancelamento, utilizando o TID (<i>Transaction ID</i>).
-	 * @param	string $tid TID da transação que será utilizado para fazer a consulta
-	 * @return	CancellationRequest
-	 */
-	final public function buildCancellationTransaction( $tid ) {
-		$this->transaction = new CancellationRequest( $this->getHTTPRequester() );
-		$this->transaction->addNode( new EcDataNode( $this->getAffiliationCode() , $this->getAffiliationKey() ) );
-		$this->transaction->setTID( $tid );
-		$this->transaction->setURL( $this->cieloURL );
-
-		return $this->transaction;
-	}
-
-	/**
-	 * @brief	Cria um objeto Transacao
-	 * @details	Constroi o objeto de transação a partir de uma captura, utilizando o TID (<i>Transaction ID</i>).
-	 * @param	string $tid TID da transação que será utilizado para fazer a captura
-	 * @param	float $valor Valor que será capturado
-	 * @return	CaptureRequest
-	 * @throws	InvalidArgumentException Se o valor for definido mas não for numérico
-	 */
-	final public function buildCaptureTransaction( $tid , $value = null ) {
-		$nullValue = is_null( $value );
-
-		if ( $nullValue || is_float( $value ) || is_int( $value ) ) {
-			$this->transaction = new CaptureRequest( $this->getHTTPRequester() );
-			$this->transaction->addNode( new EcDataNode( $this->getAffiliationCode() , $this->getAffiliationKey() ) );
-			$this->transaction->setTID( $tid );
-			$this->transaction->setURL( $this->cieloURL );
-
-			if (  !$nullValue ) {
-				$this->transaction->setValue( $value );
-			}
-
-			return $this->transaction;
-		} else {
-			throw new InvalidArgumentException( sprintf( 'O valor deve ser um inteiro ou float, %s foi dado' , gettype( $value ) ) );
-		}
-	}
-
-	/**
-	 * Define que a captura será feita automaticamente, por padrão a captura é manual.
-	 * @return	Cielo
-	 */
-	public function automaticCapture() {
-		$this->automaticCapture = true;
-
-		return $this;
 	}
 
 	/**
