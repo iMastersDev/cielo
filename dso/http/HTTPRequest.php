@@ -31,5 +31,5 @@ interface HTTPRequest {
 	 * @param	$method string Método que será utilizado para enviar os dados
 	 * @return	string Resposta HTTP
 	 */
-	public function execute( array $data , $method = HTTPRequestMethod::GET );
+	public function execute( array $data = array() , $method = HTTPRequestMethod::GET );
 }
