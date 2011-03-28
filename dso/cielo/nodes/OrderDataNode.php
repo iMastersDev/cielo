@@ -66,9 +66,9 @@ class OrderDataNode implements XMLNode {
 		$this->currency = $currency;
 
 		if ( is_null( $dateTime ) ) {
-			$dateTime = strftime( '%Y-%m-%dT%H:%M:%S' );
+			$dateTime = date( 'c' );
 		} else {
-			$dateTime = strftime( '%Y-%m-%d %H:%M:%S' , strtotime( $dateTime ) );
+			$dateTime = date( 'c' , strtotime( $dateTime ) );
 		}
 
 		$this->language = $language;
